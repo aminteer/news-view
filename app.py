@@ -2,11 +2,18 @@
 # visit http://127.0.0.1:8050/ in your web browser.
 
 
-from dash import Dash, html, dcc
+from dash import Dash, dcc, html
 import plotly.express as px
 import pandas as pd
 
 app = Dash(__name__)
+
+server = app.server
+
+colors = {
+    'background': '#111111',
+    'text': '#7FDBFF'
+}
 
 # assume you have a "long-form" data frame
 # see https://plotly.com/python/px-arguments/ for more options
@@ -18,18 +25,32 @@ df = pd.DataFrame({
 
 fig = px.bar(df, x="Sources", y="Amount", color="City", barmode="group")
 
-app.layout = html.Div(children=[
-    html.H1(children='NewsView'),
+fig.update_layout(
+    plot_bgcolor=colors['background'],
+    paper_bgcolor=colors['background'],
+    font_color=colors['text']
+)
 
-    html.Div(children='''
-        NewsView: Know what is going on with one glance.
-    '''),
+app.layout = html.Div(style={'backgroundColor': colors['background']}, children=[
+    html.H1(
+        children='NewsView',
+        style={
+            'textAlign': 'center',
+            'color': colors['text']
+        }
+    ),
+
+    html.Div(children='NewsView: Know what is going on with one glance.', style={
+        'textAlign': 'center',
+        'color': colors['text']
+    }),
 
     dcc.Graph(
-        id='example-graph',
+        id='example-graph-2',
         figure=fig
     )
 ])
 
 if __name__ == '__main__':
     app.run(debug=True)
+
