@@ -1,25 +1,35 @@
-from dash import Dash, dcc, html, Input, Output, callback
-import os
+# Run this app with `python app.py` and
+# visit http://127.0.0.1:8050/ in your web browser.
 
 
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+from dash import Dash, html, dcc
+import plotly.express as px
+import pandas as pd
 
-app = Dash(__name__, external_stylesheets=external_stylesheets)
+app = Dash(__name__)
 
-server = app.server
+# assume you have a "long-form" data frame
+# see https://plotly.com/python/px-arguments/ for more options
+df = pd.DataFrame({
+    "Sources": ["New York Times", "The Economist", "Wall Street Journal", "The Atlantic", "Guardian", "The Financial Times"],
+    "Amount": [4, 1, 2, 2, 4, 5],
+    "City": ["SF", "SF", "SF", "Montreal", "Montreal", "Montreal"]
+})
 
-app.layout = html.Div([
-    html.H1('Hello World'),
-    dcc.Dropdown(['LA', 'NYC', 'MTL'],
-        'LA',
-        id='dropdown'
-    ),
-    html.Div(id='display-value')
+fig = px.bar(df, x="Sources", y="Amount", color="City", barmode="group")
+
+app.layout = html.Div(children=[
+    html.H1(children='NewsView'),
+
+    html.Div(children='''
+        NewsView: Know what is going on with one glance.
+    '''),
+
+    dcc.Graph(
+        id='example-graph',
+        figure=fig
+    )
 ])
-
-@callback(Output('display-value', 'children'), Input('dropdown', 'value'))
-def display_value(value):
-    return f'You have selected {value}'
 
 if __name__ == '__main__':
     app.run(debug=True)
