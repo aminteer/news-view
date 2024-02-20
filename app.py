@@ -5,13 +5,17 @@ from dash import Dash, dcc, html, Input, Output, State, callback
 import plotly.express as px
 import pandas as pd
 import os
+import time
+from flask import jsonify
+import flask
 
+server = flask.Flask(__name__)
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
-app = Dash(__name__, external_stylesheets=external_stylesheets)
+app = Dash(__name__, external_stylesheets=external_stylesheets, server=server)
 
-server = app.server
+#server = app.server
 
 colors = {
     'background': '#FFFFFF',     #black is '#111111',  gray is #808080, white is #FFFFFF
@@ -51,6 +55,11 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
     }),
     
     html.Div([
+        html.H4("Top Stories in one Image"),
+        html.Img(src="/assets/news_summary.jpeg", alt="News of the day as an image"),
+    ]),
+    
+    html.Div([
         dcc.Textarea(
             id='comment',
             value='Type your comment\nhere.  Replace this text.',
@@ -87,3 +96,13 @@ def update_output_div(n_clicks, value):
 if __name__ == '__main__':
     app.run(debug=True)
 
+#testing out for monitoring purposes
+@server.route('/health')
+def report_healthy():
+    return "OK", 200
+
+@server.route('/metrics')
+def metrics():
+    return jsonify({
+        "requests_per_second": 5
+    }), 200
