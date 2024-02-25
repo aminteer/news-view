@@ -16,6 +16,13 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = Dash(__name__, external_stylesheets=external_stylesheets, server=server)
 
 #server = app.server
+#load up the current news summary text (updated daily)
+file_path = "assets/news_summary.txt"
+
+news_summary=""
+# Open the file in read mode ('r') and read its contents
+with open(file_path, 'r') as file:
+    news_summary = file.read()
 
 colors = {
     'background': '#FFFFFF',     #black is '#111111',  gray is #808080, white is #FFFFFF
@@ -56,8 +63,14 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
     
     html.Div([
         html.H4("Top Stories in one Image"),
-        html.Img(src="/assets/news_summary.jpeg", alt="News of the day as an image"),
+        html.Img(src="/assets/news_summary.png", alt="News of the day as an image"),
     ]),
+    
+    html.Div(children = news_summary, style={
+            'textAlign': 'center',
+            'color': colors['text']
+        }
+    ),
     
     html.Div([
         dcc.Textarea(

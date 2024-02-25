@@ -3,7 +3,7 @@
 Import unittest framework and the Calculator class
 '''
 import unittest
-from Calculator import Calculator
+from components.Calculator import Calculator
 from unittest.mock import MagicMock
 
 
