@@ -28,7 +28,8 @@ dash_app.title = "NewsView"
 app.add_url_rule('/dash', view_func=dash_app.server.wsgi_app)
 #app.add_url_rule('/dash', view_func=dash_app.server)
 
-#server = app.server
+server = dash_app.server
+
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///News.sqlite3'
 
 '''
@@ -56,7 +57,7 @@ with app.app_context():
 
 #Get latest news summary and images ready
 dg = DataGateway()
-news_summary = str(dg.get_news_summary_txt())
+news_summary = dg.get_news_summary_txt()
 news_summary_image = dg.get_news_summary_image()
 image_path = "assets/news_summary.png"
 
