@@ -26,7 +26,6 @@ six==1.16.0
 tenacity==8.2.3
 typing_extensions==4.9.0
 tzdata==2024.1
-urllib3==2.2.0
 Werkzeug==3.0.1
 zipp==3.17.0
 blinker==1.7.0
@@ -57,7 +56,6 @@ six==1.16.0
 tenacity==8.2.3
 typing_extensions==4.9.0
 tzdata==2024.1
-urllib3==2.2.0
 Werkzeug==3.0.1
 zipp==3.17.0
 annotated-types==0.6.0
@@ -208,3 +206,4 @@ typing_extensions==4.9.0
 tzdata==2024.1
 Werkzeug==3.0.1
 zipp==3.17.0
+urllib3==1.26.18
