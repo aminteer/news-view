@@ -9,7 +9,7 @@ import logging
 
 # Configure logging to write to a file, making sure to append log messages
 # and set the log level to DEBUG or higher
-logging.basicConfig(filename='app.log', filemode='a', format='%(asctime)s - %(levelname)s - %(message)s', level=logging.DEBUG)
+logging.basicConfig(filename='data_controller.log', filemode='a', format='%(asctime)s - %(levelname)s - %(message)s', level=logging.DEBUG)
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///News.sqlite3'

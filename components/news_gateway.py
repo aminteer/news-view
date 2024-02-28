@@ -38,18 +38,19 @@ class NewsGateway:
         
         response_stories = response.json()
         
-        stories = []
-        #transform json into a list of story descriptions
-        for story in response_stories['articles']:
-            title = story['title']
-            description = story['description']
-            if title!='[Removed]':
-                #combine into responses list
-                story_summary = f"title: {title}; description: {description}"
-                logging.debug(story_summary)
-                stories.append(story_summary)
-                
-        return stories
+        # stories = []
+        # #transform json into a list of story descriptions
+        # for story in response_stories['articles']:
+        #     title = story['title']
+        #     description = story['description']
+        #     if title!='[Removed]':
+        #         #combine into responses list
+        #         story_summary = f"title: {title}; description: {description}"
+        #         logging.debug(story_summary)
+        #         stories.append(story_summary)
+        #return stories        
+        return response_stories
+    
             
 
 if __name__ == "__main__":

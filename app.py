@@ -6,23 +6,71 @@ import plotly.express as px
 import pandas as pd
 import os
 import time
-from flask import jsonify
+#from flask import jsonify
+from flask import jsonify, Flask, render_template, request, url_for, redirect
 import flask
+from flask_sqlalchemy import SQLAlchemy
+import logging
+from datetime import datetime
+import requests
+from data.data_gateway import DataGateway
+from PIL import Image
+from io import BytesIO
 
-server = flask.Flask(__name__)
+app = flask.Flask(__name__)
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
-app = Dash(__name__, external_stylesheets=external_stylesheets, server=server)
+dash_app = Dash(__name__, external_stylesheets=external_stylesheets, server=app)
+dash_app.title = "NewsView"
+
+# Register the Dash app with the Flask app
+app.add_url_rule('/dash', view_func=dash_app.server.wsgi_app)
+#app.add_url_rule('/dash', view_func=dash_app.server)
 
 #server = app.server
-#load up the current news summary text (updated daily)
-file_path = "assets/news_summary.txt"
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///News.sqlite3'
 
-news_summary=""
-# Open the file in read mode ('r') and read its contents
-with open(file_path, 'r') as file:
-    news_summary = file.read()
+'''
+Define the database model
+that is used to store
+the top news stories.
+'''
+
+
+db = SQLAlchemy(app=app)
+logging.debug("connected to SQL alchemy, SQLite")
+
+class Articles(db.Model):
+   id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+   datetime = db.Column(db.DateTime, default=datetime.utcnow())
+   title = db.Column(db.String, nullable=False)
+   description = db.Column(db.String, nullable=True)
+
+        
+with app.app_context():
+    #drop and recreate tables - this is for initial test only, not production
+    db.drop_all()
+    db.create_all()  
+
+
+#Get latest news summary and images ready
+dg = DataGateway()
+news_summary = str(dg.get_news_summary_txt())
+news_summary_image = dg.get_news_summary_image()
+image_path = "assets/news_summary.png"
+
+news_summary_image.save(image_path)
+#news_summary_image = dg.get_news_summary_image()
+#news_summary_image = Image.open(BytesIO(dg.get_news_summary_image()))
+
+# #load up the current news summary text (updated daily)
+# file_path = "assets/news_summary.txt"
+
+# news_summary=""
+# # Open the file in read mode ('r') and read its contents
+# with open(file_path, 'r') as file:
+#     news_summary = file.read()
 
 colors = {
     'background': '#FFFFFF',     #black is '#111111',  gray is #808080, white is #FFFFFF
@@ -47,7 +95,7 @@ fig.update_layout(
     font_color=colors['text']
 )
 
-app.layout = html.Div(style={'backgroundColor': colors['background']}, children=[
+dash_app.layout = html.Div(style={'backgroundColor': colors['background']}, children=[
     html.H1(
         children='NewsView',
         style={
@@ -63,7 +111,8 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
     
     html.Div([
         html.H4("Top Stories in one Image"),
-        html.Img(src="/assets/news_summary.png", alt="News of the day as an image"),
+        #html.Img(src="/assets/news_summary.png", alt="News of the day as an image"),
+        html.Img(src=image_path, alt="News of the day as an image"),
     ]),
     
     html.Div(children = news_summary, style={
@@ -106,16 +155,55 @@ def update_output_div(n_clicks, value):
         #comment_history = comment_history2
         return comment_history2
 
+
 if __name__ == '__main__':
     app.run(debug=True)
+    
+    
 
 #testing out for monitoring purposes
-@server.route('/health')
+@app.route('/health')
 def report_healthy():
     return "OK", 200
 
-@server.route('/metrics')
+@app.route('/metrics')
 def metrics():
     return jsonify({
         "requests_per_second": 5
     }), 200
+
+@app.route('/addstories',methods=('GET', 'POST'))
+def add_new_stories():
+    if request.method=='POST':
+        current_top_stories = request.json
+        for story in current_top_stories['articles']:
+            title = story['title']
+            description = story['description']
+            if title!='[Removed]':
+                #add to database
+                new_entry = Articles(title=title, description=description)
+                with app.app_context():
+                    db.session.add(new_entry)
+                    db.session.commit()
+                    story_summary = f"title: {title}; description: {description}"
+                    print(story_summary)
+                    logging.debug(story_summary)
+    return {'status': 'success', 'message': 'updated'}
+
+def get_database_stories():
+    with app.app_context():
+        result2 = db.session.query(Articles.description).all()
+        return result2
+
+
+def count_words(text):
+    # Split the text into words based on whitespace
+    words = text.split()
+    # Return the number of words
+    return len(words)
+
+def avg_words_per_description(descr_list):
+    word_count = 0
+    for row in descr_list:
+        word_count += count_words(str(row))
+    return word_count/len(descr_list)

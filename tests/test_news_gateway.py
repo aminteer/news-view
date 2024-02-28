@@ -1,22 +1,20 @@
 #!/usr/bin/env python
-'''
-Import unittest framework and the Calculator class
-'''
-import unittest
-from components.Calculator import Calculator
-from unittest.mock import MagicMock
 
+import unittest
+from components.news_gateway import NewsGateway
+from unittest.mock import MagicMock
 
 '''
 Test cases are created by subclassing unittest.TestCase
 '''
-class TestCalculator(unittest.TestCase):
+class TestNewsGateway(unittest.TestCase):
     '''
     setUp function is used to instantiate the object we are testing.
     '''
     def setUp(self):
-        self.calculator = Calculator()
+        self.gateway = NewsGateway()
         self.calculator._get_exchange_rate = MagicMock(return_value=0.82)
+        self.gateway.get_top_stories = MagicMock(return_value="Lots of news today")
 
     '''
     Test the add function.
