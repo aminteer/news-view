@@ -183,23 +183,27 @@ def update_output_div(n_clicks, value):
     if n_clicks > 0:
         #comment_history2 = comment_history + " \n{}".format(value)
         comment_history2 = value
+        logging.debug("Comment added")
         #print(comment_history)
         #comment_markdown = "### Comments \n {}".format(comment_history)
         #comment_history = comment_history2
         return comment_history2
 
 #text and image refresh
-@callback(Output('daily_summary_txt', 'children'),
-            Output('daily_summary_image', 'src'),
-            Input('interval-component', 'n_intervals'))
-def update_summary_data():
+@callback(
+        Output('daily_summary_text', 'children'),
+        Output('daily_summary_image', 'src'),
+        [Input('interval-component', 'n_intervals')]
+)
+def update_summary_data(n_intervals):
     new_text, new_image_path = load_summary_data()
     logging.debug("Web app refreshed image and summary")
     return new_text, new_image_path 
  
     
 if __name__ == '__main__':
-    app.run(debug=True)
+    #app.run(debug=True)
+    dash_app.run_server(debug=True)
     
 
 #testing out for monitoring purposes

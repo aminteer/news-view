@@ -10,7 +10,7 @@ from io import BytesIO, StringIO
 
 # Configure logging to write to a file, making sure to append log messages
 # and set the log level to DEBUG or higher
-logging.basicConfig(filename='data_controller.log', filemode='a', format='%(asctime)s - %(levelname)s - %(message)s', level=logging.DEBUG)
+logging.basicConfig(filename='data_gateway.log', filemode='a', format='%(asctime)s - %(levelname)s - %(message)s', level=logging.DEBUG)
 IMAGE_FILE_NAME = "news_summary.png"
 NEWS_SUMMARY_FILE_NAME = "news_summary.txt"
 
@@ -56,8 +56,16 @@ class DataGateway:
             
             if img!=None:
                 news_img = img #Image(img)
+                
+                #resize image
+                width, height = news_img.size
+                # Calculate the new size, shrinking it by 60%
+                scale = 0.6
+
+                # Resize the image
+                resized_image = news_img.resize((int(width * scale), int(height*scale)),resample=Image.BICUBIC) 
                 # save the file locall
-                news_img.save(filename)
+                resized_image.save(filename)
                 
                 if self.__upload_file(filename,self.aws_bucket_name):
                     logging.debug("News summary image successfully saved to S3")
