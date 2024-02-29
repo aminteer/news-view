@@ -206,3 +206,5 @@ tzdata==2024.1
 Werkzeug==3.0.1
 zipp==3.17.0
 urllib3<2
+appsignal
+opentelemetry-instrumentation-flask

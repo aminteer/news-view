@@ -16,6 +16,12 @@ import requests
 from data.data_gateway import DataGateway
 from PIL import Image
 from io import BytesIO
+from __appsignal__ import appsignal
+from opentelemetry import trace
+from appsignal import set_category, set_gauge, increment_counter
+
+#appsignal Heroku addon used for metrics tracking.  The below has to be before Flask app start
+appsignal.start()
 
 app = flask.Flask(__name__)
 
@@ -49,19 +55,22 @@ class Articles(db.Model):
    description = db.Column(db.String, nullable=True)
 
         
-with app.app_context():
-    #drop and recreate tables - this is for initial test only, not production
-    db.drop_all()
-    db.create_all()  
+# with app.app_context():
+#     #drop and recreate tables - this is for initial test only, not production
+#     db.drop_all()
+#     db.create_all()  
 
+tracer = trace.get_tracer(__name__)
+with tracer.start_as_current_span("News summaries load"):
+    #Get latest news summary and images ready
+    dg = DataGateway()
+    news_summary = dg.get_news_summary_txt()
+    news_summary_image = dg.get_news_summary_image()
+    image_path = "assets/news_summary.png"
 
-#Get latest news summary and images ready
-dg = DataGateway()
-news_summary = dg.get_news_summary_txt()
-news_summary_image = dg.get_news_summary_image()
-image_path = "assets/news_summary.png"
-
-news_summary_image.save(image_path)
+    news_summary_image.save(image_path)
+    set_category("data.summaries_page_load")
+    
 #news_summary_image = dg.get_news_summary_image()
 #news_summary_image = Image.open(BytesIO(dg.get_news_summary_image()))
 
@@ -175,20 +184,22 @@ def metrics():
 
 @app.route('/addstories',methods=('GET', 'POST'))
 def add_new_stories():
-    if request.method=='POST':
-        current_top_stories = request.json
-        for story in current_top_stories['articles']:
-            title = story['title']
-            description = story['description']
-            if title!='[Removed]':
-                #add to database
-                new_entry = Articles(title=title, description=description)
-                with app.app_context():
-                    db.session.add(new_entry)
-                    db.session.commit()
-                    story_summary = f"title: {title}; description: {description}"
-                    print(story_summary)
-                    logging.debug(story_summary)
+    with tracer.start_as_current_span("Stories save to database"):
+        if request.method=='POST':
+            current_top_stories = request.json
+            for story in current_top_stories['articles']:
+                title = story['title']
+                description = story['description']
+                if title!='[Removed]':
+                    #add to database
+                    new_entry = Articles(title=title, description=description)
+                    with app.app_context():
+                        db.session.add(new_entry)
+                        db.session.commit()
+                        story_summary = f"title: {title}; description: {description}"
+                        print(story_summary)
+                        logging.debug(story_summary)
+                        increment_counter("stories.saved",1)
     return {'status': 'success', 'message': 'updated'}
 
 def get_database_stories():
