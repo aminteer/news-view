@@ -68,6 +68,7 @@ class DataGateway:
             filename = IMAGE_FILE_NAME
             obj = self.__download_file(bucket=self.aws_bucket_name,file_name=filename, type = 'image')
             img = Image.open(BytesIO(obj))
+            logging.debug("News summary image downloaded from S3")
             #save a copy locally for debug purposes
             img.save("news_summary_image_debug.png")
             return img
@@ -76,7 +77,7 @@ class DataGateway:
             filename = NEWS_SUMMARY_FILE_NAME
             obj = self.__download_file(bucket=self.aws_bucket_name,file_name=filename, type = 'text')
             text_obj = str(obj)
-            
+            logging.debug("News summary text downloaded from S3")
             return text_obj
 
 

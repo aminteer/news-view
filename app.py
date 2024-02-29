@@ -60,17 +60,23 @@ class Articles(db.Model):
 #     db.drop_all()
 #     db.create_all()  
 
-tracer = trace.get_tracer(__name__)
-with tracer.start_as_current_span("News summaries load"):
-    #Get latest news summary and images ready
+
+def load_summary_data ():
+    #load new summary info
+        #Get latest news summary and images ready
     dg = DataGateway()
     news_summary = dg.get_news_summary_txt()
     news_summary_image = dg.get_news_summary_image()
     image_path = "assets/news_summary.png"
 
     news_summary_image.save(image_path)
-    set_category("data.summaries_page_load")
     
+    return news_summary, image_path
+
+tracer = trace.get_tracer(__name__)
+with tracer.start_as_current_span("News summaries load"):
+    news_summary, image_path = load_summary_data()
+    set_category("data.summaries_page_load")    
 #news_summary_image = dg.get_news_summary_image()
 #news_summary_image = Image.open(BytesIO(dg.get_news_summary_image()))
 
@@ -121,7 +127,9 @@ dash_app.layout = html.Div(style={'backgroundColor': colors['background']}, chil
     
     html.Br(),
     
-    html.Div(children = news_summary, style={
+    html.Div(children = news_summary, 
+             id = 'daily_summary_text',
+             style={
             'textAlign': 'center',
             'color': colors['text']
         }
@@ -131,6 +139,7 @@ dash_app.layout = html.Div(style={'backgroundColor': colors['background']}, chil
         html.H4("Top Stories in one Image"),
         #html.Img(src="/assets/news_summary.png", alt="News of the day as an image"),
         html.Img(src=image_path, alt="News of the day as an image",
+            id = 'daily_summary_image',
             style={
             'height': '50%',
             'width': '50%'
@@ -157,7 +166,12 @@ dash_app.layout = html.Div(style={'backgroundColor': colors['background']}, chil
     dcc.Graph(
         id='example-graph-2',
         figure=fig
-    )
+    ),
+    dcc.Interval(
+        id='interval-component',
+        interval=60*1000, # in milliseconds
+        n_intervals=0
+        ),
 ])
 
 @callback(
@@ -174,10 +188,18 @@ def update_output_div(n_clicks, value):
         #comment_history = comment_history2
         return comment_history2
 
-
+#text and image refresh
+@callback(Output('daily_summary_txt', 'children'),
+            Output('daily_summary_image', 'src'),
+            Input('interval-component', 'n_intervals'))
+def update_summary_data():
+    new_text, new_image_path = load_summary_data()
+    logging.debug("Web app refreshed image and summary")
+    return new_text, new_image_path 
+ 
+    
 if __name__ == '__main__':
     app.run(debug=True)
-    
     
 
 #testing out for monitoring purposes
