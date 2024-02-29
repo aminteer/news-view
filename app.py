@@ -119,17 +119,26 @@ dash_app.layout = html.Div(style={'backgroundColor': colors['background']}, chil
         'color': colors['text']
     }),
     
-    html.Div([
-        html.H4("Top Stories in one Image"),
-        #html.Img(src="/assets/news_summary.png", alt="News of the day as an image"),
-        html.Img(src=image_path, alt="News of the day as an image"),
-    ]),
+    html.Br(),
     
     html.Div(children = news_summary, style={
             'textAlign': 'center',
             'color': colors['text']
         }
     ),
+       
+    html.Div([
+        html.H4("Top Stories in one Image"),
+        #html.Img(src="/assets/news_summary.png", alt="News of the day as an image"),
+        html.Img(src=image_path, alt="News of the day as an image",
+            style={
+            'height': '50%',
+            'width': '50%'
+            })
+        ], style={'textAlign': 'center'}
+    ),
+ 
+    html.Br(),
     
     html.Div([
         dcc.Textarea(
