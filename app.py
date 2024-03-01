@@ -49,10 +49,11 @@ db = SQLAlchemy(app=app)
 logging.debug("connected to SQL alchemy, SQLite")
 
 class Articles(db.Model):
-   id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-   datetime = db.Column(db.DateTime, default=datetime.utcnow())
-   title = db.Column(db.String, nullable=False)
-   description = db.Column(db.String, nullable=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    datetime = db.Column(db.DateTime, default=datetime.utcnow())
+    title = db.Column(db.String, nullable=False)
+    description = db.Column(db.String, nullable=True)
+    source_name = db.Column(db.String, nullable=True)
 
         
 # with app.app_context():

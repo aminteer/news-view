@@ -25,7 +25,6 @@ class NewsGateway:
         #categories can be:
         # business, entertainment, general,health, science, sports, technology.
         #url: https://newsapi.org/docs/endpoints/top-headlines
-        import requests
         #logging.debug(f"News api key: {news_api_key}")
         url = (self.NewsURL +
             'country=us&'
@@ -37,20 +36,26 @@ class NewsGateway:
         logging.debug(response.json())
         
         response_stories = response.json()
-        
-        # stories = []
-        # #transform json into a list of story descriptions
-        # for story in response_stories['articles']:
-        #     title = story['title']
-        #     description = story['description']
-        #     if title!='[Removed]':
-        #         #combine into responses list
-        #         story_summary = f"title: {title}; description: {description}"
-        #         logging.debug(story_summary)
-        #         stories.append(story_summary)
-        #return stories        
+                
         return response_stories
     
+    def get_everything_news(self,date_from, date_to, query_term='technology', category = 'business'):
+        #data_from and date_to must be text and in the form of ISO standard yyyy-mm-dd, eg 2024-03-01
+        url = (self.NewsURL +
+            'country=us&'
+            'from={}&'
+            'to={}&'
+            'q={}&'
+            'category={}&'
+            'apiKey={}'.format(date_from,date_to,query_term,category, self.ApiKey))
+        logging.debug("getting stories")
+        response = requests.get(url)
+        logging.debug("request complete")
+        logging.debug(response.json())
+        
+        response_stories = response.json()
+        
+        return response_stories
             
 
 if __name__ == "__main__":
