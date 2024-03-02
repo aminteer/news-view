@@ -59,8 +59,8 @@ class DataGateway:
                 
                 #resize image
                 width, height = news_img.size
-                # Calculate the new size, shrinking it by 60%
-                scale = 0.6
+                # Calculate the new size, shrinking it by 20%
+                scale = 0.8
 
                 # Resize the image
                 resized_image = news_img.resize((int(width * scale), int(height*scale)),resample=Image.BICUBIC) 
