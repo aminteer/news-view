@@ -176,14 +176,6 @@ dash_app.layout = html.Div(style={'backgroundColor': colors['background']}, chil
     }),
     
     html.Br(),
-    
-    html.Div(children = news_summary, 
-             id = 'daily_summary_text',
-             style={
-            'textAlign': 'center',
-            'color': colors['text']
-        }
-    ),
        
     html.Div([
         html.H4("Top Stories in one Image"),
@@ -196,7 +188,17 @@ dash_app.layout = html.Div(style={'backgroundColor': colors['background']}, chil
             })
         ], style={'textAlign': 'center'}
     ),
- 
+    
+    html.Br(),
+     
+    html.Div(children = news_summary, 
+             id = 'daily_summary_text',
+             style={
+            'textAlign': 'center',
+            'color': colors['text']
+        }
+    ),
+    
     html.Br(),
     
     html.Div([

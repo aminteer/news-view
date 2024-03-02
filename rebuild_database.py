@@ -12,7 +12,8 @@ import sqlalchemy as db
 # Configure logging to write to a file, making sure to append log messages
 # and set the log level to DEBUG or higher
 logging.basicConfig(filename='rebuild_database.log', filemode='a', format='%(asctime)s - %(levelname)s - %(message)s', level=logging.DEBUG)
-
+MODULE_NAME = "rebuild_database.py"
+MODULE_REFERENCE = f"({MODULE_NAME})"
 #below is not needed since it is now imported from App
 # class Articles(db.Model):
 #    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -42,23 +43,24 @@ def add_new_stories(db_session, stories=None):
                 db_session.commit()
                 story_summary = f"title: {title}; source: {source_name}; description: {description}"
                 print(story_summary)
-                logging.debug(story_summary)
+                logging.debug(f"{MODULE_REFERENCE}{story_summary}")
 
 def grab_some_starter_data(include_prior_number_of_days = 4):
     logging.debug("Launching news collecction job at UTC {}".format(datetime.utcnow))
     
     today = datetime.now()
-
+    days_back = timedelta(days=float(include_prior_number_of_days))
     # Calculate the date the required number of days ago
-    datetime_from = today - timedelta(days=include_prior_number_of_days) # can change this date
-
+    datetime_from = today - days_back # can change this date
+    logging.debug(f"{MODULE_REFERENCE}days back calc result is {str(days_back)}")
     # Convert the date to a string in ISO format (yyyy-mm-dd)
     date_from = datetime_from.strftime('%Y-%m-%d')
-    date_to = date_from = today.strftime('%Y-%m-%d')
-    
+    date_to = today.strftime('%Y-%m-%d')
+    logging.debug(f"{MODULE_REFERENCE}date from {date_from} to {date_to}")
     try:
         news = NewsGateway()
-        stories = news.get_everything_news(date_from=date_from, date_to=date_to,category='general')
+        stories = news.get_everything_news(date_from=date_from, date_to=date_to)
+        
         return stories
     except:
         raise Exception("News retrieval failed")
