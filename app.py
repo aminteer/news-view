@@ -20,6 +20,10 @@ from __appsignal__ import appsignal
 from opentelemetry import trace
 from appsignal import set_category, set_gauge, increment_counter
 
+MODULE_NAME = "app.py"
+MODULE_REFERENCE = f"({MODULE_NAME})"
+
+
 #appsignal Heroku addon used for metrics tracking.  The below has to be before Flask app start
 appsignal.start()
 
@@ -61,7 +65,6 @@ class Articles(db.Model):
 #     db.drop_all()
 #     db.create_all()  
 
-
 def load_summary_data ():
     #load new summary info
         #Get latest news summary and images ready
@@ -74,20 +77,57 @@ def load_summary_data ():
     
     return news_summary, image_path
 
+def get_top_10_news_sources():
+    # Perform the query and group by 'news_source'
+    results = db.session.query(
+        Articles.source_name,
+        db.func.count(Articles.source_name).label('count')
+    ).group_by(
+        Articles.source_name
+    ).order_by(
+        db.desc('count')
+    ).limit(10).all()
+    
+    # Convert the result into a pandas DataFrame
+    df = pd.DataFrame(results, columns=['source_name', 'count'])
+    logging.debug(f"{MODULE_NAME}: Top news sources query result | {str(df)}")
+    
+    return df
+
+def get_all_stories_into_log():
+    #dump all existing stories in Article table into the log file
+    articles_query = Articles.query.all()
+    # Transform the query result into a list of dictionaries
+    articles_list = [{'id': article.id, 'datetime': article.datetime, 'source_name': article.source_name, 'title': article.title, 'description': article.description} for article in articles_query]
+    # Convert the list of dictionaries into a pandas DataFrame
+    articles_df = pd.DataFrame(articles_list)
+    # Print the DataFrame to log
+    logging.debug(f"{MODULE_NAME}: all news in Article table | {str(df)}")
+
+
+def get_database_stories():
+    with app.app_context():
+        result2 = db.session.query(Articles.description).all()
+        return result2
+
+
+def count_words(text):
+    # Split the text into words based on whitespace
+    words = text.split()
+    # Return the number of words
+    return len(words)
+
+def avg_words_per_description(descr_list):
+    word_count = 0
+    for row in descr_list:
+        word_count += count_words(str(row))
+    return word_count/len(descr_list)
+
 tracer = trace.get_tracer(__name__)
 with tracer.start_as_current_span("News summaries load"):
     news_summary, image_path = load_summary_data()
     set_category("data.summaries_page_load")    
-#news_summary_image = dg.get_news_summary_image()
-#news_summary_image = Image.open(BytesIO(dg.get_news_summary_image()))
 
-# #load up the current news summary text (updated daily)
-# file_path = "assets/news_summary.txt"
-
-# news_summary=""
-# # Open the file in read mode ('r') and read its contents
-# with open(file_path, 'r') as file:
-#     news_summary = file.read()
 
 colors = {
     'background': '#FFFFFF',     #black is '#111111',  gray is #808080, white is #FFFFFF
@@ -96,15 +136,24 @@ colors = {
 
 comment_history = "Comments: /n"
 
-# assume you have a "long-form" data frame
-# see https://plotly.com/python/px-arguments/ for more options
-df = pd.DataFrame({
-    "Sources": ["New York Times", "The Economist", "Wall Street Journal", "The Atlantic", "Guardian", "The Financial Times"],
-    "Amount": [4, 1, 2, 2, 4, 5],
-    "City": ["SF", "SF", "SF", "Montreal", "Montreal", "Montreal"]
-})
+# # assume you have a "long-form" data frame
+# # see https://plotly.com/python/px-arguments/ for more options
+# df = pd.DataFrame({
+#     "Sources": ["New York Times", "The Economist", "Wall Street Journal", "The Atlantic", "Guardian", "The Financial Times"],
+#     "Amount": [4, 1, 2, 2, 4, 5],
+#     "City": ["SF", "SF", "SF", "Montreal", "Montreal", "Montreal"]
+# })
 
-fig = px.bar(df, x="Sources", y="Amount", color="City", barmode="group")
+#get historical data for analysis in chart
+with app.app_context():
+    logging.debug(f"{MODULE_REFERENCE}getting history of top 10 news stories")
+    df = get_top_10_news_sources()
+    
+# #for debugging, dump all contents into log file
+# with app.app_context():
+#     get_all_stories_into_log()
+
+fig = px.bar(df, x="source_name", y="count", barmode="group")
 
 fig.update_layout(
     plot_bgcolor=colors['background'],
@@ -200,12 +249,6 @@ def update_summary_data(n_intervals):
     new_text, new_image_path = load_summary_data()
     logging.debug("Web app refreshed image and summary")
     return new_text, new_image_path 
- 
-    
-if __name__ == '__main__':
-    #app.run(debug=True)
-    dash_app.run_server(debug=True)
-    
 
 #testing out for monitoring purposes
 @app.route('/health')
@@ -237,21 +280,10 @@ def add_new_stories():
                         logging.debug(story_summary)
                         increment_counter("stories.saved",1)
     return {'status': 'success', 'message': 'updated'}
+ 
+    
+if __name__ == '__main__':    
+    #app.run(debug=True)
+    dash_app.run_server(debug=True)
+    
 
-def get_database_stories():
-    with app.app_context():
-        result2 = db.session.query(Articles.description).all()
-        return result2
-
-
-def count_words(text):
-    # Split the text into words based on whitespace
-    words = text.split()
-    # Return the number of words
-    return len(words)
-
-def avg_words_per_description(descr_list):
-    word_count = 0
-    for row in descr_list:
-        word_count += count_words(str(row))
-    return word_count/len(descr_list)

@@ -19,8 +19,7 @@ class TestLLM_Gateway(unittest.TestCase):
         if img==None : img = self.test_image
         dg = self.gateway
         assert(dg.save_image_as_file(img=img)==True)   
-        
-    
+           
 
 if __name__ == '__main__':
     unittest.main()

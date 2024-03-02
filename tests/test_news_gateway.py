@@ -13,29 +13,11 @@ class TestNewsGateway(unittest.TestCase):
     '''
     def setUp(self):
         self.gateway = NewsGateway()
-        self.calculator._get_exchange_rate = MagicMock(return_value=0.82)
         self.gateway.get_top_stories = MagicMock(return_value="Lots of news today")
-
-    '''
-    Test the add function.
-    '''
-    def test_add(self):
-        add_result = self.calculator.add(1, 2)
-        self.assertEqual(add_result, 3)
-
-    '''
-    Test the subtract function
-    '''
-    def test_subtract(self):
-        subtract_result = self.calculator.subtract(1, 1)
-        self.assertEqual(subtract_result, 0)
-
-    '''
-    Test currency conversion
-    '''
-    def test_currency_converter(self):
-        conversion_result = self.calculator.usd_to_gbp(10)
-        self.assertEqual(conversion_result, 8.2)
+    
+    def test_get_everything(self):
+        result = self.gateway.get_top_stories()
+        self.assertEqual(result, "Lots of news today")
 
 
 if __name__ == '__main__':
