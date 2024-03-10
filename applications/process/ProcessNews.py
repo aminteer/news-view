@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import logging
 from datetime import datetime
-from components.news_gateway import NewsGateway
+from components.news_collector import NewsCollector
 import pika
 import os
 from dotenv import load_dotenv
@@ -17,7 +17,7 @@ load_dotenv()
 logging.debug("Grabbing news stories")
 
 try:
-    news = NewsGateway()
+    news = NewsCollector()
     top_stories = news.get_top_stories('general')
 except:
     raise Exception("News retrieval failed")

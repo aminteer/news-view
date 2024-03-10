@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from components import llm_gateway, image_gen_gateway, news_gateway
+from components import llm_gateway, image_gen_gateway, news_collector
 from PIL import Image 
 from data.data_gateway import DataGateway
 from components.transform import Transformations
@@ -19,7 +19,7 @@ def compile_stories_into_summary (stories):
 if __name__ == '__main__':
     #run through a sample process of obtaining top stories and creating prompts
     print('\nGrabbing news top stories')
-    news = news_gateway.NewsGateway()
+    news = news_collector.NewsCollector()
     #top_stories = news.get_top_stories('business')
     top_stories = news.get_top_stories('general')
     print(f"\n\nlist of top stories: \n {top_stories}")

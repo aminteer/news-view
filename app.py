@@ -16,7 +16,7 @@ import requests
 from data.data_gateway import DataGateway
 from PIL import Image
 from io import BytesIO
-from __appsignal__ import appsignal
+#from __appsignal__ import appsignal
 from opentelemetry import trace
 from appsignal import set_category, set_gauge, increment_counter
 
@@ -25,7 +25,7 @@ MODULE_REFERENCE = f"({MODULE_NAME})"
 
 
 #appsignal Heroku addon used for metrics tracking.  The below has to be before Flask app start
-appsignal.start()
+#appsignal.start()
 
 app = flask.Flask(__name__)
 

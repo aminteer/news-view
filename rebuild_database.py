@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime, timedelta
-from components.news_gateway import NewsGateway
+from components.news_collector import NewsCollector
 from sqlalchemy import Column, Integer, Float, Date
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
@@ -58,7 +58,7 @@ def grab_some_starter_data(include_prior_number_of_days = 4):
     date_to = today.strftime('%Y-%m-%d')
     logging.debug(f"{MODULE_REFERENCE}date from {date_from} to {date_to}")
     try:
-        news = NewsGateway()
+        news = NewsCollector()
         stories = news.get_everything_news(date_from=date_from, date_to=date_to)
         
         return stories
