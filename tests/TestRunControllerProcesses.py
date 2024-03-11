@@ -3,11 +3,12 @@ from components import llm_gateway, image_gen_gateway, news_collector
 from PIL import Image 
 from data.data_gateway import DataGateway
 from components.transform import Transformations
+import json
 
 # import llm_gateway
 # import image_gen_gateway
 # import news_gateway
-
+STORIES_FILENAME = 'stories.json'
 
 def compile_stories_into_summary (stories):
     summary = ""
@@ -63,6 +64,10 @@ if __name__ == '__main__':
     trans.RunFullProcess()
     nice_summary = trans.story_summary_refined
     img = trans.image_result
+    
+    #save stories to local file for debuging
+    with open(STORIES_FILENAME, 'w') as file:
+        json.dump(trans.stories_json, file, indent=4)
     
         #save the summary to a file
     dg = DataGateway()

@@ -4,18 +4,12 @@
 from dash import Dash, dcc, html, Input, Output, State, callback
 import plotly.express as px
 import pandas as pd
-import os
-import time
-#from flask import jsonify
 from flask import jsonify, Flask, render_template, request, url_for, redirect
 import flask
 from flask_sqlalchemy import SQLAlchemy
 import logging
 from datetime import datetime
-import requests
 from data.data_gateway import DataGateway
-from PIL import Image
-from io import BytesIO
 #from __appsignal__ import appsignal
 from opentelemetry import trace
 from appsignal import set_category, set_gauge, increment_counter
@@ -170,7 +164,7 @@ dash_app.layout = html.Div(style={'backgroundColor': colors['background']}, chil
         }
     ),
 
-    html.Div(children='NewsView: Know what is going on with one glance.', style={
+    html.Div(children='Know what is going on with one glance.', style={
         'textAlign': 'center',
         'color': colors['text']
     }),
@@ -286,6 +280,7 @@ def add_new_stories():
     
 if __name__ == '__main__':    
     #app.run(debug=True)
-    dash_app.run_server(debug=True)
+    #dash_app.run_server(debug=True)
+    dash_app.run_server(host="0.0.0.0", debug=False, port=8050)
     
 

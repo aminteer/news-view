@@ -5,7 +5,7 @@ from sqlalchemy import Column, Integer, Float, Date
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from app import Articles
+from applications.app.app import Articles
 from time import time
 import sqlalchemy as db
 
